@@ -1,22 +1,44 @@
-// Funcionalidade 30: Calculadora de dias até uma data.
-// Objetivo: Calcula dias entre referência e data-alvo.
-// Exemplo de entrada: { dataAlvo: '2026-12-31', referencia: '2026-11-26' }
-// Implemente conforme as regras e critérios do enunciado fornecido pelo professor.
+const implemented = true;
 
-const implemented = false;
+const MS_POR_DIA = 86400000;
 
-// Desenvolva a regra de negócio e valide todos os dados de entrada.
-function execute(input) {
-  // TODO: substituir este bloco pela implementação testada da funcionalidade.
-  void input;
-  throw new Error("Funcionalidade ainda não implementada.");
+function paraDiaUTC(valor, campo) {
+  if (typeof valor !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+    throw new Error(`${campo} deve ser uma data no formato YYYY-MM-DD.`);
+  }
+  const [ano, mes, dia] = valor.split('-').map(Number);
+  const t = Date.UTC(ano, mes - 1, dia);
+  const dt = new Date(t);
+  if (
+    dt.getUTCFullYear() !== ano ||
+    dt.getUTCMonth() !== mes - 1 ||
+    dt.getUTCDate() !== dia
+  ) {
+    throw new Error(`${campo} não é uma data válida.`);
+  }
+  return t;
 }
 
-// Mantém o contrato de integração utilizado pela API central.
+/**
+ * Feature 30 - Calculadora de dias até uma data.
+ * diasRestantes = dataAlvo - referencia (em dias), preservando o sinal:
+ * positivo se a data-alvo é futura, 0 se igual, negativo se passada.
+ * Não usa o relógio do sistema: a referência é sempre informada.
+ */
+function execute(input) {
+  if (input === null || typeof input !== 'object') {
+    throw new Error('Informe um objeto com dataAlvo e referencia.');
+  }
+  const alvo = paraDiaUTC(input.dataAlvo, 'dataAlvo');
+  const ref = paraDiaUTC(input.referencia, 'referencia');
+  return { diasRestantes: Math.round((alvo - ref) / MS_POR_DIA) };
+}
+
 module.exports = {
   id: 30,
-  name: "Calculadora de dias até uma data",
-  description: "Calcula dias entre referência e data-alvo.",
+  name: 'Calculadora de dias até uma data',
+  description:
+    'Calcula quantos dias faltam entre uma data de referência e uma data-alvo.',
   implemented,
-  execute
+  execute,
 };

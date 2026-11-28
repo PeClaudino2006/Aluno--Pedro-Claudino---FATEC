@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências (reprodutível)
+        run: npm ci
+
+      - name: Verificar formatação
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes automatizados
+        run: npm test
+
+      - name: Auditoria de dependências
+        run: npm audit --audit-level=high
+
+      - name: Smoke test
+        run: npm run test:smoke
+
+      - name: Build da imagem Docker
+        run: docker build --pull -t lab40:feature30 .
+
+      - name: Executar container efêmero e validar
+        run: |
+          docker run -d --name lab40-container -p 3000:3000 lab40:feature30
+          for i in $(seq 1 20); do
+            curl --fail http://localhost:3000/health && break || sleep 1
+          done
+          curl --fail -X POST http://localhost:3000/api/features/30 \
+            -H "Content-Type: application/json" \
+            -d '{"dataAlvo":"2026-12-31","referencia":"2026-11-26"}'
+          docker logs lab40-container
+          docker stop lab40-container
+          docker rm lab40-container
+
+      - name: Exportar imagem
+        run: docker save lab40:feature30 -o lab40-feature30.tar
+
+      - name: Armazenar imagem como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab40-image
+          path: lab40-feature30.tar

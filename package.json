@@ -6,9 +6,21 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "test:spec": "node --test --test-reporter=spec",
+    "lint": "eslint .",
+    "test:smoke": "node scripts/smoke.js",
+    "format": "prettier --write src/features/feature30.js test scripts eslint.config.js",
+    "format:check": "prettier --check src/features/feature30.js test scripts eslint.config.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.16.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1"
   }
 }
